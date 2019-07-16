@@ -12,8 +12,12 @@ impl SimpleState for Pong {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
+        // Load the spritesheet necessary to render the graphics.
+        let sprite_sheet_handle = load_sprite_sheet(world);
+
         world.register::<Paddle>();
-        initialize_paddles(world);
+
+        initialize_paddles(world, sprite_sheet_handle);
         initialize_camera(world);
     }
 }
@@ -64,7 +68,7 @@ impl Component for Paddle {
 }
 
 // Initializes one paddle on the left, and one paddle on the right.
-fn initialize_paddles(world: &mut World) {
+fn initialize_paddles(world: &mut World, sprite_sheet: Handle<SpriteSheet>) {
     let mut left_transform = Transform::default();
     let mut right_transform = Transform::default();
 
@@ -73,9 +77,16 @@ fn initialize_paddles(world: &mut World) {
     left_transform.set_translation_xyz(PADDLE_WIDTH * 0.5, y, 0.0);
     right_transform.set_translation_xyz(ARENA_WIDTH - PADDLE_WIDTH * 0.5, y, 0.0);
 
+    // Assign the sprites for the paddles
+    let sprite_render = SpriteRender {
+        sprite_sheet: sprite_sheet.clone(),
+        sprite_number: 0, // paddle is the first sprite in the sprite sheet
+    };
+
     // Create left paddle entity.
     world
         .create_entity()
+        .with(sprite_render.clone())
         .with(Paddle::new(Side::Left))
         .with(left_transform)
         .build();
@@ -83,7 +94,33 @@ fn initialize_paddles(world: &mut World) {
     // Create right paddle entity.
     world
         .create_entity()
+        .with(sprite_render.clone())
         .with(Paddle::new(Side::Right))
         .with(right_transform)
         .build();
+}
+
+fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
+    // Load the sprite sheet necessary to render the graphics.
+    // The texture is the pixel data
+    // `texture_handle` is a cloneable reference to the texture
+    let texture_handle = {
+        let loader = world.read_resource::<Loader>();
+        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+        loader.load(
+            "texture/pong_spritesheet.png",
+            ImageFormat::default(),
+            (),
+            &texture_storage,
+        )
+    };
+
+    let loader = world.read_resource::<Loader>();
+    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
+    loader.load(
+        "texture/pong_spritesheet.ron", // Here we load the associated ron file
+        SpriteSheetFormat(texture_handle),
+        (),
+        &sprite_sheet_store,
+    )
 }
