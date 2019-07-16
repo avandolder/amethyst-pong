@@ -12,8 +12,8 @@ use amethyst::{
     window::{ScreenDimensions, Window, WindowBundle},
 };
 
-pub struct Pong;
-impl SimpleState for Pong {}
+mod pong;
+use crate::pong::Pong;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
