@@ -2,6 +2,7 @@ extern crate amethyst;
 
 use amethyst::{
     assets::Processor,
+    core::transform::TransformBundle,
     ecs::{ReadExpect, Resources, SystemData},
     prelude::*,
     renderer::{
@@ -24,6 +25,8 @@ fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         // The WindowBundle provides all the scaffolding for opening a window
         .with_bundle(WindowBundle::from_config_path(display_config_path))?
+        // Add the transform bundle which handles tracking entity positions
+        .with_bundle(TransformBundle::new())?
         // A Processor system is added to handle loading spritesheets.
         .with(
             Processor::<SpriteSheet>::new(),
