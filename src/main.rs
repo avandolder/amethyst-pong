@@ -5,8 +5,8 @@ use amethyst::{
     ecs::{ReadExpect, Resources, SystemData},
     prelude::*,
     renderer::{
-        pass::DrawFlat2DDesc, types::DefaultBackend, Factory, Format, GraphBuilder,
-        GraphCreator, Kind, RenderGroupDesc, RenderingSystem, SpriteSheet, SubpassBuilder,
+        pass::DrawFlat2DDesc, types::DefaultBackend, Factory, Format, GraphBuilder, GraphCreator,
+        Kind, RenderGroupDesc, RenderingSystem, SpriteSheet, SubpassBuilder,
     },
     utils::application_root_dir,
     window::{ScreenDimensions, Window, WindowBundle},
@@ -90,7 +90,7 @@ impl GraphCreator<DefaultBackend> for ExampleGraph {
         let window = <ReadExpect<'_, Window>>::fetch(res);
         let dimensions = self.dimensions.as_ref().unwrap();
         let window_kind = Kind::D2(dimensions.width() as u32, dimensions.height() as u32, 1, 1);
-        
+
         // Create a new drawing surface in our window.
         let surface = factory.create_surface(&window);
         let surface_format = factory.get_surface_format(&surface);
