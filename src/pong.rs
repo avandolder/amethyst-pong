@@ -6,6 +6,14 @@ use amethyst::{
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
 };
 
+pub const ARENA_HEIGHT: f32 = 100.0;
+pub const ARENA_WIDTH: f32 = 100.0;
+pub const BALL_VELOCITY_X: f32 = 75.0;
+pub const BALL_VALOCITY_Y: f32 = 50.0;
+pub const BALL_RADIUS: f32 = 2.0;
+pub const PADDLE_HEIGHT: f32 = 16.0;
+pub const PADDLE_WIDTH: f32 = 4.0;
+
 pub struct Pong;
 
 impl SimpleState for Pong {
@@ -20,9 +28,6 @@ impl SimpleState for Pong {
     }
 }
 
-pub const ARENA_HEIGHT: f32 = 100.0;
-pub const ARENA_WIDTH: f32 = 100.0;
-
 fn initialize_camera(world: &mut World) {
     // Set up camera in a way that our screen covers the whole arena and
     // (0,0) is in the bottom left.
@@ -35,9 +40,6 @@ fn initialize_camera(world: &mut World) {
         .with(transform)
         .build();
 }
-
-pub const PADDLE_HEIGHT: f32 = 16.0;
-pub const PADDLE_WIDTH: f32 = 4.0;
 
 #[derive(PartialEq, Eq)]
 pub enum Side {
