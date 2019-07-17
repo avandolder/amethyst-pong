@@ -89,7 +89,7 @@ impl GraphCreator<DefaultBackend> for ExampleGraph {
             self.dimensions = new_dimensions.map(|d| d.clone());
             return false;
         }
-        return self.dirty;
+        self.dirty
     }
 
     // This is the core of a RenderGraph, which is building the actual graph with
@@ -104,7 +104,7 @@ impl GraphCreator<DefaultBackend> for ExampleGraph {
             hal::command::{ClearDepthStencil, ClearValue},
         };
 
-        self.dirty = true;
+        self.dirty = false;
 
         // Retreive a reference to the target window, which is created by the
         // WindowBundle.
