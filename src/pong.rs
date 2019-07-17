@@ -1,25 +1,48 @@
 use amethyst::{
     assets::{AssetStorage, Handle, Loader},
-    core::transform::Transform,
+    core::{timing::Time, transform::Transform},
     ecs::prelude::{Component, DenseVecStorage},
     prelude::*,
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
 };
 
-pub struct Pong;
+#[derive(Default)]
+pub struct Pong {
+    ball_spawn_timer: Option<f32>,
+    sprite_sheet_handle: Option<Handle<SpriteSheet>>,
+}
 
 impl SimpleState for Pong {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         let world = data.world;
 
+        // Wait for one second before spawning the ball.
+        self.ball_spawn_timer.replace(1.0);
+
         // Load the spritesheet necessary to render the graphics.
-        let sprite_sheet_handle = load_sprite_sheet(world);
-
-        world.register::<Ball>();
-
-        initialize_ball(world, sprite_sheet_handle.clone());
-        initialize_paddles(world, sprite_sheet_handle);
+        // `spritesheet` is the layout of the sprites on the image;
+        // `texture` is the pixel data.
+        self.sprite_sheet_handle.replace(load_sprite_sheet(world));
+        initialize_paddles(world, self.sprite_sheet_handle.clone().unwrap());
         initialize_camera(world);
+    }
+
+    fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        if let Some(mut timer) = self.ball_spawn_timer.take() {
+            // If the timer isn't expired yet, subtract the time that has passed
+            // since the last update.
+            {
+                let time = data.world.res.fetch::<Time>();
+                timer -= time.delta_seconds();
+            }
+            if timer <= 0.0 {
+                // When timer expire, spawn the ball
+                initialize_ball(data.world, self.sprite_sheet_handle.clone().unwrap());
+            } else {
+                self.ball_spawn_timer.replace(timer);
+            }
+        }
+        Trans::None
     }
 }
 
