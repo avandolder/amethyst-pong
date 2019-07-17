@@ -4,6 +4,7 @@ use amethyst::{
     assets::Processor,
     core::transform::TransformBundle,
     ecs::{ReadExpect, Resources, SystemData},
+    input::{InputBundle, StringBindings},
     prelude::*,
     renderer::{
         pass::DrawFlat2DDesc, types::DefaultBackend, Factory, Format, GraphBuilder, GraphCreator,
@@ -16,17 +17,25 @@ use amethyst::{
 mod pong;
 use crate::pong::Pong;
 
+mod systems;
+
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
     let app_root = application_root_dir()?;
     let display_config_path = app_root.join("resources").join("display_config.ron");
 
+    let binding_path = app_root.join("resources").join("bindings_config.ron");
+    let input_bundle =
+        InputBundle::<StringBindings>::new().with_bindings_from_file(binding_path)?;
+
     let game_data = GameDataBuilder::default()
         // The WindowBundle provides all the scaffolding for opening a window
         .with_bundle(WindowBundle::from_config_path(display_config_path))?
         // Add the transform bundle which handles tracking entity positions
         .with_bundle(TransformBundle::new())?
+        .with_bundle(input_bundle)?
+        .with(systems::PaddleSystem, "paddle_system", &["input_system"])
         // A Processor system is added to handle loading spritesheets.
         .with(
             Processor::<SpriteSheet>::new(),
