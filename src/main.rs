@@ -16,9 +16,9 @@ use amethyst::{
 };
 
 mod pong;
-use crate::pong::Pong;
-
 mod systems;
+
+use crate::pong::Pong;
 
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
@@ -35,19 +35,14 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(WindowBundle::from_config_path(display_config_path))?
         // Add the transform bundle which handles tracking entity positions
         .with_bundle(TransformBundle::new())?
-        .with_bundle(input_bundle)?
-        .with_bundle(UiBundle::<DefaultBackend, StringBindings>::new())?
         // A Processor system is added to handle loading spritesheets.
         .with(
             Processor::<SpriteSheet>::new(),
             "sprite_sheet_processor",
             &[],
         )
-        // The renderer must be executed on the same thread consecutively, so we
-        // intialize it as thread_local which will always execute on the main thread.
-        .with_thread_local(RenderingSystem::<DefaultBackend, _>::new(
-            ExampleGraph::default(),
-        ))
+        .with_bundle(input_bundle)?
+        .with_bundle(UiBundle::<DefaultBackend, StringBindings>::new())?
         .with(systems::PaddleSystem, "paddle_system", &["input_system"])
         .with(systems::MoveBallsSystem, "ball_system", &[])
         .with(
@@ -55,7 +50,12 @@ fn main() -> amethyst::Result<()> {
             "collision_system",
             &["paddle_system", "ball_system"],
         )
-        .with(systems::WinnerSystem, "winner_system", &["ball_system"]);
+        .with(systems::WinnerSystem, "winner_system", &["ball_system"])
+        // The renderer must be executed on the same thread consecutively, so we
+        // intialize it as thread_local which will always execute on the main thread.
+        .with_thread_local(RenderingSystem::<DefaultBackend, _>::new(
+            ExampleGraph::default(),
+        ));
 
     let assets_dir = app_root.join("assets");
     let mut game = Application::new(assets_dir, Pong::default(), game_data)?;
