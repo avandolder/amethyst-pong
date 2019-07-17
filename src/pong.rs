@@ -6,14 +6,6 @@ use amethyst::{
     renderer::{Camera, ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat, Texture},
 };
 
-pub const ARENA_HEIGHT: f32 = 100.0;
-pub const ARENA_WIDTH: f32 = 100.0;
-pub const BALL_VELOCITY_X: f32 = 75.0;
-pub const BALL_VELOCITY_Y: f32 = 50.0;
-pub const BALL_RADIUS: f32 = 2.0;
-pub const PADDLE_HEIGHT: f32 = 16.0;
-pub const PADDLE_WIDTH: f32 = 4.0;
-
 pub struct Pong;
 
 impl SimpleState for Pong {
@@ -31,6 +23,9 @@ impl SimpleState for Pong {
     }
 }
 
+pub const ARENA_HEIGHT: f32 = 100.0;
+pub const ARENA_WIDTH: f32 = 100.0;
+
 fn initialize_camera(world: &mut World) {
     // Set up camera in a way that our screen covers the whole arena and
     // (0,0) is in the bottom left.
@@ -43,6 +38,34 @@ fn initialize_camera(world: &mut World) {
         .with(transform)
         .build();
 }
+
+fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
+    // Load the sprite sheet necessary to render the graphics.
+    // The texture is the pixel data
+    // `texture_handle` is a cloneable reference to the texture
+    let texture_handle = {
+        let loader = world.read_resource::<Loader>();
+        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+        loader.load(
+            "texture/pong_spritesheet.png",
+            ImageFormat::default(),
+            (),
+            &texture_storage,
+        )
+    };
+
+    let loader = world.read_resource::<Loader>();
+    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
+    loader.load(
+        "texture/pong_spritesheet.ron", // Here we load the associated ron file
+        SpriteSheetFormat(texture_handle),
+        (),
+        &sprite_sheet_store,
+    )
+}
+
+pub const PADDLE_HEIGHT: f32 = 16.0;
+pub const PADDLE_WIDTH: f32 = 4.0;
 
 #[derive(PartialEq, Eq)]
 pub enum Side {
@@ -103,6 +126,10 @@ fn initialize_paddles(world: &mut World, sprite_sheet: Handle<SpriteSheet>) {
         .build();
 }
 
+pub const BALL_VELOCITY_X: f32 = 75.0;
+pub const BALL_VELOCITY_Y: f32 = 50.0;
+pub const BALL_RADIUS: f32 = 2.0;
+
 pub struct Ball {
     pub velocity: [f32; 2],
     pub radius: f32,
@@ -133,29 +160,4 @@ fn initialize_ball(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) 
         })
         .with(local_transform)
         .build();
-}
-
-fn load_sprite_sheet(world: &mut World) -> Handle<SpriteSheet> {
-    // Load the sprite sheet necessary to render the graphics.
-    // The texture is the pixel data
-    // `texture_handle` is a cloneable reference to the texture
-    let texture_handle = {
-        let loader = world.read_resource::<Loader>();
-        let texture_storage = world.read_resource::<AssetStorage<Texture>>();
-        loader.load(
-            "texture/pong_spritesheet.png",
-            ImageFormat::default(),
-            (),
-            &texture_storage,
-        )
-    };
-
-    let loader = world.read_resource::<Loader>();
-    let sprite_sheet_store = world.read_resource::<AssetStorage<SpriteSheet>>();
-    loader.load(
-        "texture/pong_spritesheet.ron", // Here we load the associated ron file
-        SpriteSheetFormat(texture_handle),
-        (),
-        &sprite_sheet_store,
-    )
 }
