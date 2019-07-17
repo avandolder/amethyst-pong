@@ -35,7 +35,6 @@ fn main() -> amethyst::Result<()> {
         // Add the transform bundle which handles tracking entity positions
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
-        .with(systems::PaddleSystem, "paddle_system", &["input_system"])
         // A Processor system is added to handle loading spritesheets.
         .with(
             Processor::<SpriteSheet>::new(),
@@ -46,7 +45,14 @@ fn main() -> amethyst::Result<()> {
         // intialize it as thread_local which will always execute on the main thread.
         .with_thread_local(RenderingSystem::<DefaultBackend, _>::new(
             ExampleGraph::default(),
-        ));
+        ))
+        .with(systems::PaddleSystem, "paddle_system", &["input_system"])
+        .with(systems::MoveBallsSystem, "ball_system", &[])
+        .with(
+            systems::BounceSystem,
+            "collision_system",
+            &["paddle_system", "ball_system"],
+        );
 
     let assets_dir = app_root.join("assets");
     let mut game = Application::new(assets_dir, Pong, game_data)?;
