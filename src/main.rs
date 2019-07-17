@@ -10,6 +10,7 @@ use amethyst::{
         pass::DrawFlat2DDesc, types::DefaultBackend, Factory, Format, GraphBuilder, GraphCreator,
         Kind, RenderGroupDesc, RenderingSystem, SpriteSheet, SubpassBuilder,
     },
+    ui::{DrawUiDesc, UiBundle},
     utils::application_root_dir,
     window::{ScreenDimensions, Window, WindowBundle},
 };
@@ -35,6 +36,7 @@ fn main() -> amethyst::Result<()> {
         // Add the transform bundle which handles tracking entity positions
         .with_bundle(TransformBundle::new())?
         .with_bundle(input_bundle)?
+        .with_bundle(UiBundle::<DefaultBackend, StringBindings>::new())?
         // A Processor system is added to handle loading spritesheets.
         .with(
             Processor::<SpriteSheet>::new(),
@@ -52,7 +54,8 @@ fn main() -> amethyst::Result<()> {
             systems::BounceSystem,
             "collision_system",
             &["paddle_system", "ball_system"],
-        );
+        )
+        .with(systems::WinnerSystem, "winner_system", &["ball_system"]);
 
     let assets_dir = app_root.join("assets");
     let mut game = Application::new(assets_dir, Pong::default(), game_data)?;
@@ -134,7 +137,8 @@ impl GraphCreator<DefaultBackend> for ExampleGraph {
         // We pass the subpass builder a description of our pass for construction.
         let pass = graph_builder.add_node(
             SubpassBuilder::new()
-                .with_group(DrawFlat2DDesc::new().builder())
+                .with_group(DrawFlat2DDesc::default().builder()) // Draws sprites
+                .with_group(DrawUiDesc::default().builder()) // Draws UI components
                 .with_color(color)
                 .with_depth_stencil(depth)
                 .into_pass(),
