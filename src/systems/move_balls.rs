@@ -5,9 +5,9 @@ use amethyst::{
 
 use crate::pong::Ball;
 
-pub struct MoveBallSystem;
+pub struct MoveBallsSystem;
 
-impl<'s> System<'s> for MoveBallSystem {
+impl<'s> System<'s> for MoveBallsSystem {
     type SystemData = (
         ReadStorage<'s, Ball>,
         WriteStorage<'s, Transform>,
